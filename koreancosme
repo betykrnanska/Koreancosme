@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KOREANCOSME</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syncopate:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --white:   #ffffff;
+      --offwhite:#f8f7f6;
+      --pale:    #f1f0f4;
+      --silver:  #a8adb8;
+      --silver2: #d0d4dc;
+      --black:   #0a0a0c;
+      --ink:     #1a1a22;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--white);
+      color: var(--ink);
+      font-family: 'Space Mono', monospace;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CURSOR ──────────────────────────────────────── */
+    .cursor {
+      position: fixed; top: 0; left: 0;
+      width: 10px; height: 10px;
+      background: var(--black); border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: width .18s, height .18s;
+    }
+    .cursor-ring {
+      position: fixed; top: 0; left: 0;
+      width: 34px; height: 34px;
+      border: 1px solid var(--silver); border-radius: 50%;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: transform .18s ease; opacity: .5;
+    }
+
+    /* ── NAV ─────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(28px);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+    .nav-top {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 52px; height: 64px;
+    }
+    .nav-logo {
+      font-family: 'Syncopate', sans-serif;
+      font-weight: 700; font-size: 13px;
+      letter-spacing: 0.34em; color: var(--black); text-decoration: none;
+      flex-shrink: 0;
+    }
+    .nav-links {
+      display: flex; gap: 0; list-style: none; height: 100%;
+    }
+    .nav-links > li {
+      position: relative; height: 64px;
+      display: flex; align-items: center;
+    }
+    .nav-links > li > a {
+      font-family: 'Syncopate', sans-serif;
+      font-size: 8.5px; letter-spacing: 0.22em; font-weight: 700;
+      color: var(--black); text-decoration: none;
+      padding: 0 22px; height: 100%;
+      display: flex; align-items: center;
+      position: relative;
+      transition: color .25s, background .25s;
+    }
+    .nav-links > li > a::after {
+      content: '';
+      position: absolute; bottom: 0; left: 22px; right: 22px;
+      height: 2px;
+      background: linear-gradient(90deg,#9bbfe6,#c9a8e8,#90e0d0);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .3s ease;
+    }
+    .nav-links > li:hover > a { color: var(--black); background: rgba(0,0,0,.025); }
+    .nav-links > li:hover > a::after { transform: scaleX(1); }
+    .nav-links > li > a .caret {
+      margin-left: 5px; font-size: 7px; opacity: .45;
+      transition: transform .25s;
+    }
+    .nav-links > li:hover > a .caret { transform: rotate(180deg); }
+
+    /* nav right extras */
+    .nav-extras {
+      display: flex; align-items: center; gap: 20px; flex-shrink: 0;
+    }
+    .nav-extras a {
+      font-family: 'Syncopate', sans-serif; font-size: 7.5px;
+      letter-spacing: .22em; color: var(--ink); text-decoration: none;
+      opacity: .5; transition: opacity .25s;
+    }
+    .nav-extras a:hover { opacity: 1; }
+    .nav-extras .nav-contact-btn {
+      background: var(--black); color: var(--white);
+      padding: 9px 20px; font-size: 7px; letter-spacing: .26em;
+      opacity: 1; font-family: 'Syncopate', sans-serif;
+      transition: background .25s;
+    }
+    .nav-extras .nav-contact-btn:hover { background: #2a2a38; }
+
+    /* ── MEGA DROPDOWN ── */
+    .nav-dropdown {
+      position: absolute; top: 64px; left: 0;
+      min-width: 240px;
+      background: rgba(255,255,255,0.99);
+      border: 1px solid rgba(0,0,0,0.07);
+      border-top: 2px solid transparent;
+      border-image: linear-gradient(90deg,#9bbfe6,#c9a8e8,#90e0d0) 1;
+      box-shadow: 0 16px 48px rgba(0,0,0,.1);
+      opacity: 0; visibility: hidden;
+      transform: translateY(-8px);
+      transition: opacity .28s ease, transform .28s ease, visibility .28s;
+      pointer-events: none;
+    }
+    .nav-links > li:hover .nav-dropdown {
+      opacity: 1; visibility: visible;
+      transform: translateY(0); pointer-events: auto;
+    }
+    .nav-dropdown-inner { padding: 12px 0; }
+    .nav-dropdown-label {
+      font-family: 'Syncopate', sans-serif; font-size: 7px;
+      letter-spacing: .42em; color: var(--silver);
+      padding: 12px 24px 8px; display: block;
+    }
+    .nav-dropdown a {
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      color: var(--ink); text-decoration: none;
+      padding: 10px 24px; gap: 12px;
+      transition: background .2s, color .2s;
+    }
+    .nav-dropdown a:hover {
+      background: var(--pale); color: var(--black);
+    }
+    .nav-dropdown a .sub-arrow {
+      font-size: 9px; opacity: 0; transition: opacity .2s, transform .2s;
+      background: linear-gradient(90deg,#9bbfe6,#c9a8e8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-dropdown a:hover .sub-arrow { opacity: 1; transform: translateX(3px); }
+    .nav-dropdown hr {
+      border: none; border-top: 1px solid rgba(0,0,0,.06); margin: 6px 0;
+    }
+
+    @media(max-width:900px){
+      .nav-top { padding: 0 22px; }
+      .nav-links > li > a { padding: 0 14px; font-size: 7.5px; }
+      .nav-extras .nav-contact-btn { display: none; }
+    }
+    @media(max-width:680px){
+      .nav-links { display: none; }
+      .nav-extras { gap: 12px; }
+    }
+
+    /* ── HERO ────────────────────────────────────────── */
+    .hero {
+      position: relative; width: 100vw; height: 100vh;
+      overflow: hidden; display: flex; align-items: flex-end;
+      background: var(--black);
+    }
+    #heroVideo {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      filter: saturate(1.15) contrast(1.08) brightness(0.93);
+      transform: translateZ(0) scale(1.001);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      will-change: transform;
+      z-index: 0;
+    }
+    #heroParticleCanvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 1; pointer-events: none;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to top, rgba(10,10,14,.88) 0%, rgba(10,10,14,.22) 40%, rgba(10,10,14,.04) 62%, transparent 80%),
+        linear-gradient(to right, rgba(10,10,14,.65) 0%, rgba(10,10,14,.08) 48%, transparent 68%);
+      z-index: 2;
+    }
+    .scanlines {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.01) 3px, rgba(0,0,0,.01) 4px);
+      z-index: 3; pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 4; padding: 0 52px 80px; max-width: 800px; }
+    .hero-eyebrow {
+      font-family: 'Syncopate', sans-serif; font-size: 8px; letter-spacing: .44em;
+      color: var(--silver2); margin-bottom: 20px;
+      animation: fadeUp 1.1s ease .3s both;
+    }
+    .hero-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(54px, 7.5vw, 114px);
+      line-height: .9; font-weight: 400; letter-spacing: -.02em; color: var(--white);
+      margin-bottom: 30px; animation: fadeUp 1.1s ease .5s both;
+    }
+    .hero-title .iri {
+      background: linear-gradient(115deg, #9bbfe6 0%, #c9a8e8 30%, #90e0d0 58%, #e6b8a0 80%, #e8a0bc 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      font-style: italic;
+    }
+    .hero-sub {
+      font-size: 10px; letter-spacing: .14em; line-height: 2.1; color: var(--silver2); max-width: 340px;
+      animation: fadeUp 1.1s ease .7s both;
+    }
+    .hero-cta {
+      margin-top: 44px; display: flex; gap: 18px; align-items: center;
+      animation: fadeUp 1.1s ease .9s both;
+    }
+    .btn-primary {
+      font-family: 'Syncopate', sans-serif; font-size: 8px; letter-spacing: .3em;
+      background: var(--black); color: var(--white); border: none; padding: 16px 36px;
+      cursor: none; text-decoration: none; display: inline-block;
+      transition: background .3s, transform .2s;
+    }
+    .btn-primary:hover { background: #2a2a38; transform: translateY(-2px); }
+    .btn-ghost {
+      font-family: 'Syncopate', sans-serif; font-size: 8px; letter-spacing: .3em;
+      background: transparent; color: var(--white);
+      border: 1px solid rgba(255,255,255,.28);
+      padding: 16px 36px; cursor: none; text-decoration: none; display: inline-block;
+      transition: border-color .3s, color .3s;
+    }
+    .btn-ghost:hover { border-color: var(--silver2); color: var(--silver2); }
+
+    .scroll-ind {
+      position: absolute; bottom: 34px; right: 52px; z-index: 5;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      animation: fadeUp 1.4s ease 1.2s both;
+    }
+    .scroll-ind span {
+      font-family: 'Syncopate', sans-serif; font-size: 7px; letter-spacing: .36em;
+      color: var(--silver2); writing-mode: vertical-lr;
+    }
+    .scroll-line {
+      width: 1px; height: 58px;
+      background: linear-gradient(to bottom, var(--silver2), transparent);
+      animation: scrollPulse 2.2s ease infinite;
+    }
+
+    /* ── TICKER ──────────────────────────────────────── */
+    .featured-strip {
+      overflow: hidden;
+      border-top: 1px solid rgba(0,0,0,.065);
+      border-bottom: 1px solid rgba(0,0,0,.065);
+      background: var(--offwhite);
+    }
+    .ticker { display: flex; animation: tickerMove 26s linear infinite; white-space: nowrap; }
+    .ticker-item {
+      font-family: 'Syncopate', sans-serif; font-size: 8px; letter-spacing: .4em;
+      padding: 17px 46px; color: var(--silver);
+      border-right: 1px solid rgba(0,0,0,.055); flex-shrink: 0;
+    }
+    .ticker-item.hi {
+      background: linear-gradient(90deg,#9bbfe6,#c9a8e8,#90e0d0);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* ── SECTIONS ────────────────────────────────────── */
+    .section { padding: 120px 52px; background: var(--white); }
+    .section.pale { background: var(--pale); }
+    .section-label {
+      font-family: 'Syncopate', sans-serif; font-size: 7px; letter-spacing: .52em;
+      color: var(--silver); margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(32px,4vw,62px); font-weight: 400; line-height: 1.08;
+      margin-bottom: 60px; max-width: 560px; color: var(--black);
+    }
+    .section-title em {
+      font-style: italic;
+      background: linear-gradient(100deg,#9bbfe6 0%,#c9a8e8 50%,#90e0d0 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* ── PRODUCT GRID ────────────────────────────────── */
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; }
+    .product-card {
+      position: relative; overflow: hidden; aspect-ratio: 3/4;
+      background: var(--pale); cursor: none;
+    }
+    .product-card canvas { width: 100%; height: 100%; display: block; }
+    .product-card-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(10,10,12,.82) 0%, transparent 55%);
+      opacity: 0; transition: opacity .4s;
+    }
+    .product-card:hover .product-card-overlay { opacity: 1; }
+    .product-card-info {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 26px 22px; transform: translateY(8px); opacity: 0; transition: all .4s;
+    }
+    .product-card:hover .product-card-info { opacity: 1; transform: translateY(0); }
+    .product-card-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--white); margin-bottom: 5px; }
+    .product-card-sub { font-size: 8px; letter-spacing: .22em; color: var(--silver2); }
+
+    /* ── FEATURE FULL ────────────────────────────────── */
+    .feature-full { position: relative; width: 100%; height: 78vh; overflow: hidden; display: flex; align-items: center; }
+    #featureCanvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .feature-full-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to right, rgba(248,247,246,.94) 36%, rgba(248,247,246,.08) 72%, transparent);
+    }
+    .feature-content { position: relative; z-index: 2; padding: 0 80px; max-width: 540px; }
+    .feature-tag { font-family: 'Syncopate', sans-serif; font-size: 7px; letter-spacing: .44em; color: var(--silver); margin-bottom: 20px; }
+    .feature-headline { font-family: 'DM Serif Display', serif; font-size: clamp(36px,4vw,58px); color: var(--black); line-height: 1.05; margin-bottom: 22px; }
+    .feature-desc { font-size: 10px; line-height: 2.2; color: var(--silver); max-width: 380px; margin-bottom: 34px; }
+
+    /* ── INGREDIENTS ─────────────────────────────────── */
+    .ingredients { padding: 110px 52px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; background: var(--white); }
+    .ingredient-visual { position: relative; height: 500px; }
+    #ingredientCanvas { width: 100%; height: 100%; }
+    .ingredient-item {
+      border-bottom: 1px solid rgba(0,0,0,.065); padding: 26px 0;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      cursor: none; transition: border-color .3s;
+    }
+    .ingredient-item:hover { border-color: var(--silver); }
+    .ingredient-name { font-family: 'DM Serif Display', serif; font-size: 21px; color: var(--black); }
+    .ingredient-origin { font-family: 'Syncopate', sans-serif; font-size: 7px; letter-spacing: .3em; color: var(--silver); margin-top: 6px; }
+    .ingredient-num { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--silver2); }
+
+    /* ── EXHIBITION ──────────────────────────────────── */
+    .exhibition {
+      padding: 130px 52px;
+      background: var(--black);
+      position: relative; overflow: hidden;
+    }
+    .exhibition::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 80% 40%, hsla(260,45%,40%,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 20% 70%, hsla(175,45%,35%,.14) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .exhibition-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 72px; position: relative; z-index: 2;
+    }
+    .exhibition-header-left { max-width: 540px; }
+    .exhibition .section-label { color: var(--silver2); margin-bottom: 16px; }
+    .exhibition-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(34px,4.5vw,66px);
+      font-weight: 400; line-height: 1.04; color: var(--white);
+    }
+    .exhibition-title em {
+      font-style: italic;
+      background: linear-gradient(115deg,#9bbfe6 0%,#c9a8e8 35%,#90e0d0 65%,#e8b8a0 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .exhibition-meta {
+      text-align: right;
+    }
+    .exhibition-venue {
+      font-family: 'Syncopate', sans-serif;
+      font-size: 8px; letter-spacing: .38em; color: var(--silver); margin-bottom: 6px;
+    }
+    .exhibition-dates {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px; color: var(--white); font-style: italic;
+    }
+    .exhibition-address {
+      font-size: 9px; letter-spacing: .14em; color: var(--silver); margin-top: 6px;
+    }
+
+    /* artist grid */
+    .artist-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2px;
+      position: relative; z-index: 2;
+      margin-bottom: 2px;
+    }
+    .artist-card {
+      position: relative; overflow: hidden;
+      aspect-ratio: 4/5;
+      background: #111118;
+      cursor: none;
+    }
+    .artist-card.featured {
+      grid-column: span 2;
+      aspect-ratio: unset;
+    }
+    .artist-card canvas { width: 100%; height: 100%; display: block; }
+    .artist-card-glass {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(10,10,14,.9) 0%, rgba(10,10,14,.2) 45%, transparent 70%);
+      transition: background .4s;
+    }
+    .artist-card:hover .artist-card-glass {
+      background: linear-gradient(to top, rgba(10,10,14,.95) 0%, rgba(10,10,14,.45) 55%, rgba(10,10,14,.08) 80%);
+    }
+    .artist-card-body {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 30px 28px; z-index: 2;
+    }
+    .artist-number {
+      font-family: 'Syncopate', sans-serif; font-size: 7px;
+      letter-spacing: .44em; color: var(--silver); margin-bottom: 10px;
+      opacity: .7;
+    }
+    .artist-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(22px, 2.2vw, 34px); color: var(--white);
+      line-height: 1.1; margin-bottom: 6px;
+    }
+    .artist-card.featured .artist-name { font-size: clamp(28px,3vw,50px); }
+    .artist-medium {
+      font-size: 9px; letter-spacing: .2em; color: var(--silver); margin-bottom: 14px;
+    }
+    .artist-desc {
+      font-size: 10px; line-height: 1.95; color: rgba(200,202,212,.6);
+      max-width: 440px;
+      max-height: 0; overflow: hidden;
+      transition: max-height .5s ease, opacity .4s ease;
+      opacity: 0;
+    }
+    .artist-card:hover .artist-desc { max-height: 120px; opacity: 1; }
+    .artist-tag {
+      display: inline-block;
+      font-family: 'Syncopate', sans-serif; font-size: 7px; letter-spacing: .28em;
+      border: 1px solid rgba(255,255,255,.14);
+      padding: 5px 14px; color: var(--silver);
+      margin-top: 16px;
+      transition: border-color .3s, color .3s;
+    }
+    .artist-card:hover .artist-tag {
+      border-color: rgba(155,191,230,.5); color: #9bbfe6;
+    }
+
+    /* bottom strip */
+    .exhibition-bottom {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;
+      position: relative; z-index: 2;
+    }
+    .exh-info-panel {
+      background: #0e0e14; padding: 36px 32px;
+    }
+    .exh-info-label {
+      font-family: 'Syncopate', sans-serif; font-size: 7px;
+      letter-spacing: .44em; color: var(--silver); margin-bottom: 14px; opacity: .6;
+    }
+    .exh-info-value {
+      font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--white); font-weight: 400;
+      line-height: 1.5;
+    }
+    .exh-info-sub {
+      font-size: 9px; letter-spacing: .12em; color: var(--silver); margin-top: 8px; opacity: .55;
+    }
+    .exh-rsvp {
+      background: var(--white); padding: 36px 32px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .exh-rsvp-title {
+      font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--black); font-style: italic;
+    }
+    .exh-rsvp-sub { font-size: 9px; letter-spacing: .14em; color: var(--silver); margin-top: 8px; }
+    .btn-rsvp {
+      font-family: 'Syncopate', sans-serif; font-size: 8px; letter-spacing: .3em;
+      background: var(--black); color: var(--white);
+      border: none; padding: 14px 28px; cursor: none;
+      text-decoration: none; display: inline-block; align-self: flex-start;
+      transition: background .3s;
+    }
+    .btn-rsvp:hover { background: #2a2a38; }
+
+    @media(max-width:768px){
+      .exhibition{padding:70px 22px;}
+      .exhibition-header{flex-direction:column;align-items:flex-start;gap:24px;}
+      .exhibition-meta{text-align:left;}
+      .artist-grid{grid-template-columns:1fr;}
+      .artist-card.featured{grid-column:span 1;}
+      .exhibition-bottom{grid-template-columns:1fr;}
+    }
+
+    /* ── MUSIC BUTTON ────────────────────────────────── */
+    .music-btn {
+      position: fixed; bottom: 36px; right: 36px; z-index: 200;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(0,0,0,0.08);
+      display: flex; align-items: center; justify-content: center;
+      cursor: none;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      transition: transform .25s ease, box-shadow .25s ease, background .25s;
+    }
+    .music-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 32px rgba(155,191,230,0.38);
+    }
+    .music-btn.playing {
+      background: var(--black);
+      box-shadow: 0 4px 28px rgba(155,191,230,0.28);
+    }
+    .music-btn svg { width: 18px; height: 18px; }
+    .music-btn .music-bars {
+      display: flex; gap: 3px; align-items: flex-end; height: 18px;
+    }
+    .music-btn .bar {
+      width: 3px; border-radius: 2px;
+      background: linear-gradient(to top, #9bbfe6, #c9a8e8);
+      animation: barBounce 1.1s ease-in-out infinite;
+    }
+    .music-btn.playing .bar {
+      background: linear-gradient(to top, #9bbfe6, #c9a8e8);
+    }
+    .music-btn .bar:nth-child(1){ height: 8px;  animation-delay: 0s; }
+    .music-btn .bar:nth-child(2){ height: 14px; animation-delay: .18s; }
+    .music-btn .bar:nth-child(3){ height: 10px; animation-delay: .36s; }
+    .music-btn .bar:nth-child(4){ height: 16px; animation-delay: .1s; }
+    .music-btn .bar:nth-child(5){ height: 7px;  animation-delay: .28s; }
+    .music-btn:not(.playing) .bar { animation-play-state: paused; }
+    @keyframes barBounce {
+      0%,100% { transform: scaleY(1); }
+      50%      { transform: scaleY(.3); }
+    }
+    .music-tooltip {
+      position: fixed; bottom: 98px; right: 36px; z-index: 200;
+      font-family: 'Syncopate', sans-serif; font-size: 7px; letter-spacing: .26em;
+      color: var(--ink); background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0,0,0,0.06);
+      padding: 8px 14px; white-space: nowrap;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+    }
+    .music-tooltip.visible { opacity: 1; transform: translateY(0); } border-top: 1px solid rgba(0,0,0,.065); padding: 56px 52px; display: flex; justify-content: space-between; align-items: flex-end; background: var(--white); }
+    .footer-logo { font-family: 'Syncopate', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: .3em; color: var(--black); }
+    .footer-copy { font-size: 8px; color: var(--silver); letter-spacing: .14em; margin-top: 10px; }
+    .footer-links { display: flex; gap: 30px; list-style: none; }
+    .footer-links a { font-family: 'Syncopate', sans-serif; font-size: 7px; letter-spacing: .24em; color: var(--silver); text-decoration: none; transition: color .3s; }
+    .footer-links a:hover { color: var(--black); }
+
+    /* ── KEYFRAMES ───────────────────────────────────── */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(26px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes scrollPulse { 0%,100%{opacity:.45} 50%{opacity:1} }
+    @keyframes tickerMove { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    .reveal { opacity:0; transform:translateY(28px); transition: opacity .85s ease, transform .85s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    /* paper grain */
+    body::after {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:9999; opacity:.4;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    }
+
+    @media(max-width:768px){
+      nav{padding:18px 22px;} .nav-links{display:none;}
+      .hero-content{padding:0 22px 60px;}
+      .section{padding:70px 22px;} .grid-3{grid-template-columns:1fr 1fr;}
+      .ingredients{grid-template-columns:1fr;padding:60px 22px;} .ingredient-visual{height:280px;}
+      footer{flex-direction:column;gap:28px;padding:36px 22px;}
+      .feature-content{padding:0 24px;}
+    }
+
+    /* ── INSTAGRAM FEED ──────────────────────────────── */
+    .insta-section {
+      padding: 120px 52px 80px;
+      background: var(--white);
+      overflow: hidden;
+    }
+    .insta-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 52px;
+    }
+    .insta-follow {
+      font-family: 'Syncopate', sans-serif; font-size: 8px; letter-spacing: .32em;
+      color: var(--ink); opacity: .5; text-decoration: none;
+      display: flex; align-items: center; gap: 12px;
+      transition: opacity .3s;
+    }
+    .insta-follow:hover { opacity: 1; }
+    .ig-icon {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg,#f9ce34 0%,#ee2a7b 50%,#6228d7 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ig-icon svg { width: 18px; height: 18px; fill: white; }
+    .insta-track-wrap {
+      overflow: hidden; margin: 0 -52px;
+      mask-image: linear-gradient(to right,transparent 0%,black 5%,black 95%,transparent 100%);
+      -webkit-mask-image: linear-gradient(to right,transparent 0%,black 5%,black 95%,transparent 100%);
+    }
+    .insta-track {
+      display: flex; gap: 3px; width: max-content;
+      animation: instaScroll 44s linear infinite;
+    }
+    .insta-track:hover { animation-play-state: paused; }
+    @keyframes instaScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .insta-card {
+      position: relative; overflow: hidden; flex-shrink: 0;
+      width: 264px; height: 322px; background: var(--pale); cursor: none;
+    }
+    .insta-card.tall { height: 390px; }
+    .insta-card.wide { width: 346px; }
+    .insta-card canvas { width:100%; height:100%; display:block; }
+    .insta-glass {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top,rgba(10,10,14,.9) 0%,transparent 55%);
+      opacity: 0; transition: opacity .35s;
+    }
+    .insta-card:hover .insta-glass { opacity: 1; }
+    .insta-info {
+      position: absolute; bottom:0; left:0; right:0; padding:18px 16px; z-index:2;
+      transform:translateY(5px); opacity:0; transition:all .35s;
+    }
+    .insta-card:hover .insta-info { opacity:1; transform:translateY(0); }
+    .insta-handle {
+      font-family:'Syncopate',sans-serif; font-size:7px; letter-spacing:.28em;
+      color:var(--silver2); margin-bottom:5px;
+    }
+    .insta-caption { font-size:9px; line-height:1.8; color:rgba(235,235,242,.72); }
+    .insta-stats { display:flex; gap:14px; margin-top:9px; }
+    .insta-stat {
+      font-family:'Space Mono',monospace; font-size:8px; color:var(--silver2);
+      display:flex; align-items:center; gap:4px;
+    }
+    .insta-badge {
+      position:absolute; top:12px; right:12px;
+      font-family:'Syncopate',sans-serif; font-size:6px; letter-spacing:.2em;
+      background:rgba(255,255,255,.13); backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,.2); color:white; padding:4px 9px;
+    }
+    .insta-type-dot {
+      position:absolute; top:14px; left:14px;
+      width:8px; height:8px; border-radius:50%;
+    }
+
+    /* ── ABOUT ───────────────────────────────────────── */
+    .about-section {
+      display: grid; grid-template-columns: 1fr 1fr;
+      background: var(--offwhite);
+    }
+    .about-left {
+      padding: 100px 64px 100px 52px;
+      border-right: 1px solid rgba(0,0,0,.065);
+    }
+    .about-right {
+      padding: 100px 52px 100px 64px;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .about-eyebrow {
+      font-family:'Syncopate',sans-serif; font-size:7px; letter-spacing:.52em;
+      color:var(--silver); margin-bottom:18px;
+    }
+    .about-title {
+      font-family:'DM Serif Display',serif;
+      font-size:clamp(34px,4vw,56px); font-weight:400; line-height:1.04;
+      color:var(--black); margin-bottom:36px;
+    }
+    .about-title em {
+      font-style:italic;
+      background:linear-gradient(115deg,#9bbfe6 0%,#c9a8e8 50%,#90e0d0 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .about-body { font-size:11px; line-height:2.25; color:var(--silver); }
+    .about-body p { margin-bottom:22px; }
+    .about-body p:last-child { margin-bottom:0; }
+    .about-body strong { color:var(--ink); font-weight:400; }
+    .about-pillars { display:grid; grid-template-columns:1fr 1fr; gap:2px; margin-bottom:3px; }
+    .pillar {
+      padding:28px 22px; background:var(--white);
+      border-bottom:2px solid transparent; transition:border-color .3s;
+    }
+    .pillar:hover { border-color:var(--silver2); }
+    .pillar-icon { font-size:22px; margin-bottom:10px; line-height:1; }
+    .pillar-name {
+      font-family:'Syncopate',sans-serif; font-size:7.5px;
+      letter-spacing:.28em; color:var(--black); margin-bottom:7px;
+    }
+    .pillar-desc { font-size:9px; line-height:1.9; color:var(--silver); }
+    .about-location {
+      display:flex; align-items:flex-start; gap:18px;
+      padding:28px 26px; background:var(--white);
+      border-left:3px solid transparent; transition:border-color .3s;
+    }
+    .about-location:hover { border-color:var(--silver2); }
+    .location-pin { font-size:24px; line-height:1; margin-top:2px; flex-shrink:0; }
+    .location-name {
+      font-family:'DM Serif Display',serif; font-size:19px;
+      color:var(--black); margin-bottom:5px;
+    }
+    .location-addr { font-size:9px; letter-spacing:.12em; color:var(--silver); line-height:2; }
+
+    /* ── FOOTER (new dark full-bleed) ────────────────── */
+    footer {
+      background: var(--black);
+      padding: 72px 52px 44px;
+      position: relative; overflow: hidden;
+    }
+    footer::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse 55% 60% at 85% 40%, hsla(260,40%,28%,.14) 0%,transparent 70%);
+    }
+    .footer-top {
+      display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:56px;
+      padding-bottom:52px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      position:relative; z-index:1;
+    }
+    .footer-logo {
+      font-family:'Syncopate',sans-serif; font-size:14px; font-weight:700;
+      letter-spacing:.32em; color:var(--white); margin-bottom:14px; display:block;
+    }
+    .footer-tagline {
+      font-family:'DM Serif Display',serif; font-size:16px; font-style:italic;
+      color:var(--silver); line-height:1.65; max-width:260px; margin-bottom:26px;
+    }
+    .footer-social { display:flex; gap:10px; }
+    .footer-social a {
+      width:34px; height:34px; border-radius:50%;
+      border:1px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--silver); text-decoration:none; font-size:12px;
+      transition:border-color .3s, color .3s;
+    }
+    .footer-social a:hover { border-color:rgba(155,191,230,.5); color:var(--white); }
+    .footer-col-title {
+      font-family:'Syncopate',sans-serif; font-size:7px; letter-spacing:.44em;
+      color:var(--silver); margin-bottom:22px; opacity:.55;
+    }
+    .footer-col-links { list-style:none; display:flex; flex-direction:column; gap:12px; }
+    .footer-col-links a {
+      font-family:'Space Mono',monospace; font-size:10px;
+      color:rgba(255,255,255,.4); text-decoration:none; transition:color .3s;
+    }
+    .footer-col-links a:hover { color:var(--white); }
+    .footer-bottom {
+      display:flex; justify-content:space-between; align-items:center;
+      padding-top:28px; position:relative; z-index:1;
+    }
+    .footer-copy { font-size:8px; letter-spacing:.14em; color:rgba(255,255,255,.22); }
+    .footer-legal { display:flex; gap:22px; }
+    .footer-legal a {
+      font-family:'Syncopate',sans-serif; font-size:7px; letter-spacing:.2em;
+      color:rgba(255,255,255,.22); text-decoration:none; transition:color .3s;
+    }
+    .footer-legal a:hover { color:var(--silver); }
+
+    @media(max-width:768px){
+      .insta-section{padding:70px 22px 60px;}
+      .insta-header{flex-direction:column;align-items:flex-start;gap:18px;}
+      .insta-card{width:200px;height:250px;}
+      .insta-card.tall{height:300px;} .insta-card.wide{width:260px;}
+      .about-section{grid-template-columns:1fr;}
+      .about-left{padding:70px 22px;border-right:none;border-bottom:1px solid rgba(0,0,0,.07);}
+      .about-right{padding:60px 22px;}
+      .about-pillars{grid-template-columns:1fr;}
+      .footer-top{grid-template-columns:1fr;gap:36px;}
+      .footer-bottom{flex-direction:column;gap:16px;text-align:center;}
+      footer{padding:56px 22px 36px;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <div class="nav-top">
+    <a href="#" class="nav-logo">KOREANCOSME</a>
+    <ul class="nav-links">
+
+      <!-- SKINCARE -->
+      <li>
+        <a href="#">Skincare <span class="caret">▾</span></a>
+        <div class="nav-dropdown">
+          <div class="nav-dropdown-inner">
+            <span class="nav-dropdown-label">SKINCARE</span>
+            <a href="#">Eye Care <span class="sub-arrow">→</span></a>
+            <a href="#">Face Creams <span class="sub-arrow">→</span></a>
+            <a href="#">Masks <span class="sub-arrow">→</span></a>
+            <a href="#">Serums <span class="sub-arrow">→</span></a>
+            <a href="#">Toners <span class="sub-arrow">→</span></a>
+            <a href="#">Pimple Patches <span class="sub-arrow">→</span></a>
+            <a href="#">Sunscreens <span class="sub-arrow">→</span></a>
+          </div>
+        </div>
+      </li>
+
+      <!-- HAIRCARE -->
+      <li>
+        <a href="#">Haircare <span class="caret">▾</span></a>
+        <div class="nav-dropdown">
+          <div class="nav-dropdown-inner">
+            <span class="nav-dropdown-label">HAIRCARE</span>
+            <a href="#">Shampoo <span class="sub-arrow">→</span></a>
+            <a href="#">Hair Masks <span class="sub-arrow">→</span></a>
+          </div>
+        </div>
+      </li>
+
+      <!-- FACE TOOLS -->
+      <li>
+        <a href="#">Face Tools <span class="caret">▾</span></a>
+        <div class="nav-dropdown">
+          <div class="nav-dropdown-inner">
+            <span class="nav-dropdown-label">FACE TOOLS</span>
+            <a href="#">Gua Sha &amp; Rollers <span class="sub-arrow">→</span></a>
+            <a href="#">LED Devices <span class="sub-arrow">→</span></a>
+            <a href="#">Cleansing Tools <span class="sub-arrow">→</span></a>
+            <a href="#">Massage &amp; Lifting <span class="sub-arrow">→</span></a>
+          </div>
+        </div>
+      </li>
+
+      <!-- BRANDS -->
+      <li>
+        <a href="#">Brands <span class="caret">▾</span></a>
+        <div class="nav-dropdown">
+          <div class="nav-dropdown-inner">
+            <span class="nav-dropdown-label">OUR BRANDS</span>
+            <a href="#">COSRX <span class="sub-arrow">→</span></a>
+            <a href="#">Laneige <span class="sub-arrow">→</span></a>
+            <a href="#">Innisfree <span class="sub-arrow">→</span></a>
+            <a href="#">Some By Mi <span class="sub-arrow">→</span></a>
+            <a href="#">TIRTIR <span class="sub-arrow">→</span></a>
+            <hr>
+            <a href="#">View All Brands <span class="sub-arrow">→</span></a>
+          </div>
+        </div>
+      </li>
+
+      <!-- BEST SELLERS -->
+      <li>
+        <a href="#">Best Sellers</a>
+      </li>
+
+    </ul>
+    <div class="nav-extras">
+      <a href="#">Athens Store</a>
+      <a href="#" class="nav-contact-btn">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <video id="heroVideo" autoplay muted loop playsinline preload="auto">
+    <source src="hero.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
+  <div class="scanlines"></div>
+  <div class="hero-particles" id="heroParticles"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">SS 2025 — Neuro-Botanical Collection</p>
+    <h1 class="hero-title">Future<br><span class="iri">Skin</span><br>Protocol</h1>
+    <p class="hero-sub">Korean cosmetic science meets speculative beauty. Formulated for the next evolution.</p>
+    <div class="hero-cta">
+      <a href="#" class="btn-primary">Discover Now</a>
+      <a href="#" class="btn-ghost">Watch Film</a>
+    </div>
+  </div>
+  <div class="scroll-ind"><span>SCROLL</span><div class="scroll-line"></div></div>
+  <canvas id="heroParticleCanvas"></canvas>
+</section>
+
+<div class="featured-strip">
+  <div class="ticker">
+    <span class="ticker-item hi">NEW COLLECTION</span><span class="ticker-item">NEURO-BOTANICAL</span>
+    <span class="ticker-item hi">SS 2025</span><span class="ticker-item">HYDRA-QUANTUM SERUM</span>
+    <span class="ticker-item hi">FREE SHIPPING KR / GLOBAL</span><span class="ticker-item">FUTURE SKIN PROTOCOL</span>
+    <span class="ticker-item hi">KOREANCOSME</span><span class="ticker-item">CLEAN FUTURISM</span>
+    <span class="ticker-item hi">NEW COLLECTION</span><span class="ticker-item">NEURO-BOTANICAL</span>
+    <span class="ticker-item hi">SS 2025</span><span class="ticker-item">HYDRA-QUANTUM SERUM</span>
+    <span class="ticker-item hi">FREE SHIPPING KR / GLOBAL</span><span class="ticker-item">FUTURE SKIN PROTOCOL</span>
+    <span class="ticker-item hi">KOREANCOSME</span><span class="ticker-item">CLEAN FUTURISM</span>
+  </div>
+</div>
+
+<section class="section pale reveal">
+  <p class="section-label">// 001 — Curated Edit</p>
+  <h2 class="section-title">Skin as <em>Architecture</em></h2>
+  <div class="grid-3">
+    <div class="product-card"><canvas class="prod-canvas" data-product="0"></canvas><div class="product-card-overlay"></div><div class="product-card-info"><div class="product-card-name">Void Serum I</div><div class="product-card-sub">HYDRA-QUANTUM / 30ML</div></div></div>
+    <div class="product-card"><canvas class="prod-canvas" data-product="1"></canvas><div class="product-card-overlay"></div><div class="product-card-info"><div class="product-card-name">Lunar Cream</div><div class="product-card-sub">NEURO-LIFT / 50ML</div></div></div>
+    <div class="product-card"><canvas class="prod-canvas" data-product="2"></canvas><div class="product-card-overlay"></div><div class="product-card-info"><div class="product-card-name">Circuit Mist</div><div class="product-card-sub">NANO-REPAIR / 120ML</div></div></div>
+  </div>
+</section>
+
+<div class="feature-full">
+  <canvas id="featureCanvas"></canvas>
+  <div class="feature-full-overlay"></div>
+  <div class="feature-content">
+    <p class="feature-tag">// HERO FORMULA</p>
+    <h2 class="feature-headline">The Ritual<br>of Tomorrow</h2>
+    <p class="feature-desc">Seven-layer biomimetic technology derived from Korean mountain botanicals, fused with precision-engineered peptide compounds. A skincare language spoken only in results.</p>
+    <a href="#" class="btn-primary">Explore The Range</a>
+  </div>
+</div>
+
+<div class="ingredients reveal">
+  <div class="ingredient-visual"><canvas id="ingredientCanvas"></canvas></div>
+  <div>
+    <p class="section-label">// 003 — Formulation Index</p>
+    <h2 class="section-title" style="font-size:clamp(26px,3vw,46px);margin-bottom:36px;">Sourced.<br><em>Calibrated.</em><br>Applied.</h2>
+    <div class="ingredient-item"><div><div class="ingredient-name">Centella Asiatica</div><div class="ingredient-origin">JEJU ISLAND, KOREA</div></div><span class="ingredient-num">01</span></div>
+    <div class="ingredient-item"><div><div class="ingredient-name">Snow Algae Extract</div><div class="ingredient-origin">ALPINE LAB, SYNTHESISED</div></div><span class="ingredient-num">02</span></div>
+    <div class="ingredient-item"><div><div class="ingredient-name">Galactomyces Ferment</div><div class="ingredient-origin">FERMENTATION CHAMBER</div></div><span class="ingredient-num">03</span></div>
+    <div class="ingredient-item"><div><div class="ingredient-name">Quantum Peptide-9</div><div class="ingredient-origin">SYNTHESISED, PROPRIETARY</div></div><span class="ingredient-num">04</span></div>
+  </div>
+</div>
+
+<!-- ══ ARTIST EXHIBITION SECTION ══ -->
+<section class="exhibition reveal" id="exhibition">
+
+  <div class="exhibition-header">
+    <div class="exhibition-header-left">
+      <p class="section-label">// 004 — In-Store Exhibition</p>
+      <h2 class="exhibition-title">Art Meets<br><em>Skin</em> — A<br>Pop-Up Encounter</h2>
+    </div>
+    <div class="exhibition-meta">
+      <div class="exhibition-venue">KOREANCOSME FLAGSHIP — GANGNAM, SEOUL</div>
+      <div class="exhibition-dates">12 Apr — 08 Jun 2025</div>
+      <div class="exhibition-address">142 Apgujeong-ro, Gangnam-gu · Open Daily 11:00–20:00</div>
+    </div>
+  </div>
+
+  <!-- Artist cards -->
+  <div class="artist-grid">
+
+    <!-- Featured artist -->
+    <div class="artist-card featured">
+      <canvas class="artist-canvas" data-hue="260" data-featured="1"></canvas>
+      <div class="artist-card-glass"></div>
+      <div class="artist-card-body">
+        <div class="artist-number">FEATURED ARTIST — 01</div>
+        <div class="artist-name">Yuna Seo</div>
+        <div class="artist-medium">Generative Sculpture / Mixed Pigment / Installation</div>
+        <div class="artist-desc">Drawing from the liminal space between skin and architecture, Yuna Seo's work dissolves the boundary between cosmetic ritual and material culture. Her large-format installations use iridescent resin, biometric data, and Korean ritual pigment traditions to construct luminous, body-scale environments.</div>
+        <a href="#" class="artist-tag">VIEW WORKS →</a>
+      </div>
+    </div>
+
+    <!-- Artist 2 -->
+    <div class="artist-card">
+      <canvas class="artist-canvas" data-hue="175"></canvas>
+      <div class="artist-card-glass"></div>
+      <div class="artist-card-body">
+        <div class="artist-number">ARTIST — 02</div>
+        <div class="artist-name">Minjun Park</div>
+        <div class="artist-medium">Holographic Print / Digital Weave</div>
+        <div class="artist-desc">Exploring the body as archive, Park's lenticular prints shift between ancestral textile motifs and future skin maps.</div>
+        <a href="#" class="artist-tag">VIEW WORKS →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="artist-grid" style="margin-top:2px; margin-bottom: 2px;">
+
+    <!-- Artist 3 -->
+    <div class="artist-card">
+      <canvas class="artist-canvas" data-hue="330"></canvas>
+      <div class="artist-card-glass"></div>
+      <div class="artist-card-body">
+        <div class="artist-number">ARTIST — 03</div>
+        <div class="artist-name">Jisoo Lim</div>
+        <div class="artist-medium">Ceramic / Glaze Research</div>
+        <div class="artist-desc">Lim's celadon-derived glazes quote Goryeo dynasty skin-care vessels, translating 12th-century beauty vessels into speculative cosmetic objects.</div>
+        <a href="#" class="artist-tag">VIEW WORKS →</a>
+      </div>
+    </div>
+
+    <!-- Artist 4 -->
+    <div class="artist-card">
+      <canvas class="artist-canvas" data-hue="200"></canvas>
+      <div class="artist-card-glass"></div>
+      <div class="artist-card-body">
+        <div class="artist-number">ARTIST — 04</div>
+        <div class="artist-name">Ara Cho</div>
+        <div class="artist-medium">Video / Bio-Reactive Light</div>
+        <div class="artist-desc">Cho's single-channel video works use UV-reactive formulas applied live in-store, turning the act of skincare into performance.</div>
+        <a href="#" class="artist-tag">VIEW WORKS →</a>
+      </div>
+    </div>
+
+    <!-- Artist 5 -->
+    <div class="artist-card">
+      <canvas class="artist-canvas" data-hue="45"></canvas>
+      <div class="artist-card-glass"></div>
+      <div class="artist-card-body">
+        <div class="artist-number">ARTIST — 05</div>
+        <div class="artist-name">Taewon Oh</div>
+        <div class="artist-medium">Sound / Olfactory Installation</div>
+        <div class="artist-desc">Spatial sound compositions tuned to the frequency of molecular scent diffusion — an invisible architecture layered over the retail floor.</div>
+        <a href="#" class="artist-tag">VIEW WORKS →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom info strip -->
+  <div class="exhibition-bottom">
+    <div class="exh-info-panel">
+      <div class="exh-info-label">OPENING RECEPTION</div>
+      <div class="exh-info-value">Saturday<br>12 April 2025<br>18:00 – 22:00</div>
+      <div class="exh-info-sub">By invitation & open RSVP. Drinks provided.</div>
+    </div>
+    <div class="exh-info-panel">
+      <div class="exh-info-label">CURATORIAL STATEMENT</div>
+      <div class="exh-info-value" style="font-size:15px;line-height:1.7;">"The store as skin — permeable, luminous, alive."</div>
+      <div class="exh-info-sub">Curated by Studio Hyun / Seoul Art Week Partner</div>
+    </div>
+    <div class="exh-rsvp">
+      <div>
+        <div class="exh-rsvp-title">Reserve your spot at the opening.</div>
+        <div class="exh-rsvp-sub">Limited capacity · Free entry · All exhibitions run through Jun 8</div>
+      </div>
+      <a href="#" class="btn-rsvp">RSVP NOW</a>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══ INSTAGRAM INFLUENCER FEED ══ -->
+<section class="insta-section reveal">
+  <div class="insta-header">
+    <div>
+      <p class="section-label">// 005 — Community Feed</p>
+      <h2 class="section-title" style="margin-bottom:0;">As Seen on <em>Instagram</em></h2>
+    </div>
+    <a href="https://www.instagram.com/koreancosme" target="_blank" rel="noopener" class="insta-follow">
+      <div class="ig-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </div>
+      @KOREANCOSME — FOLLOW
+    </a>
+  </div>
+
+  <div class="insta-track-wrap">
+    <div class="insta-track" id="instaTrack">
+      <!-- Cards injected by JS x2 for infinite loop -->
+    </div>
+  </div>
+</section>
+
+<!-- ══ ABOUT / INTRO ══ -->
+<section class="about-section reveal">
+  <div class="about-left">
+    <p class="about-eyebrow">// OUR STORY</p>
+    <h2 class="about-title">Beauty as a<br><em>Cultural</em><br>Platform</h2>
+    <div class="about-body">
+      <p><strong>Koreancosme is a concept beauty store based in Athens, Greece,</strong> dedicated to bringing top-tier Korean skincare and cosmetics into a thoughtfully curated, artistic environment. More than a retail space, Koreancosme is designed as a meeting point where beauty intersects with contemporary culture.</p>
+      <p>Rooted in the innovation and refinement of Korean cosmetics, the store offers a selection of high-quality products that reflect both advanced skincare technology and aesthetic sensibility. Alongside this, Koreancosme embraces an artistic approach — treating beauty not only as routine, but as a form of expression.</p>
+      <p>The physical space regularly hosts pop-up exhibitions featuring contemporary artists, creating an evolving dialogue between art and beauty. Through collaborations with artists, designers, and creatives, Koreancosme also develops unique events and collectible design objects that extend beyond traditional retail.</p>
+      <p>By connecting people from different fields — <strong>art, fashion, beauty, and music</strong> — Koreancosme aims to cultivate a vibrant community and redefine the experience of a beauty store as a cultural platform.</p>
+    </div>
+  </div>
+  <div class="about-right">
+    <div class="about-pillars">
+      <div class="pillar">
+        <div class="pillar-icon">✦</div>
+        <div class="pillar-name">Korean Beauty</div>
+        <div class="pillar-desc">Advanced skincare science and aesthetic philosophy from Seoul's finest labs.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">◈</div>
+        <div class="pillar-name">Art & Culture</div>
+        <div class="pillar-desc">Rotating exhibitions and artist collaborations woven into the retail experience.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">◎</div>
+        <div class="pillar-name">Community</div>
+        <div class="pillar-desc">A gathering space for creatives across art, fashion, music, and beauty.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">⬡</div>
+        <div class="pillar-name">Design Objects</div>
+        <div class="pillar-desc">Collectible editions and limited collaborations beyond traditional retail.</div>
+      </div>
+    </div>
+    <div class="about-location">
+      <div class="location-pin">📍</div>
+      <div>
+        <div class="location-name">Athens, Greece</div>
+        <div class="location-addr">
+          Concept Beauty Store<br>
+          Open Mon–Sat 11:00–20:00 · Sun 12:00–18:00<br>
+          @koreancosme · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1871767e775873776a7d79767b776b757d367b7775">[email&#160;protected]</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <span class="footer-logo">KOREANCOSME</span>
+      <p class="footer-tagline">"Where beauty meets contemporary culture."</p>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/koreancosme" target="_blank" rel="noopener" title="Instagram">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+        <a href="#" title="TikTok">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.28 6.28 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
+        </a>
+        <a href="#" title="Pinterest">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div>
+      <p class="footer-col-title">SHOP</p>
+      <ul class="footer-col-links">
+        <li><a href="#">Skincare</a></li>
+        <li><a href="#">Haircare</a></li>
+        <li><a href="#">Face Tools</a></li>
+        <li><a href="#">Brands</a></li>
+        <li><a href="#">Best Sellers</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-col-title">VISIT</p>
+      <ul class="footer-col-links">
+        <li><a href="#exhibition">Exhibition</a></li>
+        <li><a href="#">Events</a></li>
+        <li><a href="#">Artists</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2025 KOREANCOSME — ATHENS, GREECE</p>
+    <div class="footer-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms</a>
+      <a href="#">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<!-- MUSIC BUTTON -->
+<button class="music-btn" id="musicBtn" aria-label="Toggle music" title="LISA — MONEY">
+  <div class="music-bars" id="musicBars">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+  <svg id="musicPauseIcon" style="display:none" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="4" width="4" height="16" rx="1" fill="url(#ig)"/>
+    <rect x="15" y="4" width="4" height="16" rx="1" fill="url(#ig)"/>
+    <defs><linearGradient id="ig" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9bbfe6"/><stop offset="100%" stop-color="#c9a8e8"/></linearGradient></defs>
+  </svg>
+</button>
+<div class="music-tooltip" id="musicTooltip">LISA — MONEY</div>
+
+<!-- Hidden YouTube iframe -->
+<div id="ytPlayerWrap" style="position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;bottom:0;right:0;">
+  <div id="ytPlayer"></div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+
+/* ── cursor ── */
+const cur=document.getElementById('cursor'), curR=document.getElementById('cursorRing');
+document.addEventListener('mousemove',e=>{
+  cur.style.left=e.clientX+'px'; cur.style.top=e.clientY+'px';
+  curR.style.left=e.clientX+'px'; curR.style.top=e.clientY+'px';
+});
+/* ── reveal ── */
+const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ══ HERO PARTICLE OVERLAY (over real video) ══ */
+(function(){
+  const cv=document.getElementById('heroParticleCanvas'), ctx=cv.getContext('2d');
+  let W,H,t=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+
+  /* floating iridescent specks */
+  const specks=Array.from({length:260},()=>({
+    x:Math.random(), y:Math.random()+.2,
+    r:.25+Math.random()*1.4,
+    a:.03+Math.random()*.38,
+    vy:.04+.28*Math.random(),
+    vx:(Math.random()-.5)*.12,
+    hue:Math.random()*360
+  }));
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    const hue=(t*10)%360;
+
+    /* subtle iridescent corner blooms */
+    [[W*.85,H*.25,H*.55,.12],[W*.1,H*.6,H*.45,.07]].forEach(([bx,by,br,ba],i)=>{
+      const g=ctx.createRadialGradient(bx,by,0,bx,by,br);
+      g.addColorStop(0,`hsla(${(hue+i*120)%360},55%,80%,${ba+.03*Math.sin(t*.4+i)})`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    });
+
+    /* HUD grid — right side only, very faint */
+    ctx.strokeStyle='rgba(200,205,220,.04)'; ctx.lineWidth=.5;
+    for(let gx=W*.55;gx<W*.95;gx+=W*.055){ctx.beginPath();ctx.moveTo(gx,H*.08);ctx.lineTo(gx,H*.88);ctx.stroke();}
+    for(let gy=H*.08;gy<H*.88;gy+=H*.08){ctx.beginPath();ctx.moveTo(W*.55,gy);ctx.lineTo(W*.95,gy);ctx.stroke();}
+
+    /* data readout — top right */
+    ctx.font='8px "Space Mono",monospace';
+    ['HYDRATION: 98.2%','LUMINANCE: ██████░░','PEPTIDE BOND: ACTIVE','SKIN TEMP: 36.4°C','SYN-COLLAGEN: ON'].forEach((l,i)=>{
+      const lh=(hue+i*44)%360;
+      ctx.globalAlpha=.18+.06*Math.sin(t*.7+i*.6);
+      ctx.fillStyle=`hsl(${lh},50%,78%)`;
+      ctx.fillText(l,W*.62,H*.22+i*20);
+    });
+    ctx.globalAlpha=1;
+
+    /* iridescent rings — top right corner accent */
+    const rx=W*.78, ry=H*.3;
+    for(let i=0;i<3;i++){
+      const r=Math.min(W,H)*(.08+i*.05);
+      ctx.save(); ctx.translate(rx,ry); ctx.rotate(t*(.18-i*.04)+i*1.1);
+      ctx.strokeStyle=`hsla(${(hue+i*60)%360},52%,78%,${.09-i*.02})`;
+      ctx.lineWidth=.7; ctx.setLineDash([3,10+i*4]);
+      ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]); ctx.restore();
+    }
+
+    /* floating particles */
+    specks.forEach(s=>{
+      s.y -= s.vy/H; s.x += s.vx/W; s.a -= .00055;
+      if(s.a<=0||s.y<-.02){s.x=Math.random();s.y=1.02;s.a=.06+Math.random()*.32;s.hue=Math.random()*360;}
+      ctx.beginPath(); ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${s.hue},55%,82%,${s.a})`; ctx.fill();
+    });
+
+    t+=.012; requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+
+/* ══ PRODUCT CANVASES ══ */
+const prodHues=[260,175,330];
+document.querySelectorAll('.prod-canvas').forEach((cv,idx)=>{
+  const ctx=cv.getContext('2d');
+  let t=Math.random()*80;
+  const base=prodHues[idx];
+  function resize(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;}
+  resize();
+  function draw(){
+    const W=cv.width,H=cv.height;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle='#f2f1f5'; ctx.fillRect(0,0,W,H);
+    const cx=W/2,cy=H*.5,hue=(base+t*11)%360;
+
+    /* bg shimmer */
+    const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,H*.55);
+    bg.addColorStop(0,`hsla(${hue},44%,88%,.4)`);
+    bg.addColorStop(.55,`hsla(${(hue+60)%360},38%,92%,.15)`);
+    bg.addColorStop(1,'transparent');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+    ctx.save(); ctx.translate(cx,cy);
+    const bH=H*.5,bW=W*.22;
+
+    /* iridescent bottle */
+    const bg2=ctx.createLinearGradient(-bW,-bH/2,bW,bH/2);
+    bg2.addColorStop(0,`hsla(${hue},48%,84%,.72)`);
+    bg2.addColorStop(.25,`hsla(${(hue+50)%360},52%,90%,.88)`);
+    bg2.addColorStop(.5,`hsla(${(hue+100)%360},46%,86%,.78)`);
+    bg2.addColorStop(.75,`hsla(${(hue+155)%360},50%,88%,.82)`);
+    bg2.addColorStop(1,`hsla(${(hue+210)%360},44%,82%,.62)`);
+    ctx.fillStyle=bg2;
+    ctx.beginPath(); ctx.roundRect(-bW,-bH/2,bW*2,bH,[bW*.48,bW*.48,bW*.28,bW*.28]); ctx.fill();
+    ctx.strokeStyle=`hsla(${hue},38%,70%,.42)`; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(-bW,-bH/2,bW*2,bH,[bW*.48,bW*.48,bW*.28,bW*.28]); ctx.stroke();
+
+    /* cap */
+    const capG=ctx.createLinearGradient(-bW*.6,-bH/2-bW*.8,bW*.6,-bH/2);
+    capG.addColorStop(0,`hsla(${(hue+80)%360},35%,78%,.9)`);
+    capG.addColorStop(1,`hsla(${(hue+20)%360},28%,68%,.7)`);
+    ctx.fillStyle=capG;
+    ctx.beginPath(); ctx.roundRect(-bW*.62,-bH/2-bW*.72,bW*1.24,bW*.8,[bW*.18]); ctx.fill();
+
+    /* label */
+    ctx.strokeStyle=`rgba(255,255,255,${.52+.1*Math.sin(t*1.1)})`;
+    ctx.lineWidth=.6;
+    ctx.beginPath(); ctx.roundRect(-bW*.72,-bH*.13,bW*1.44,bH*.3,4); ctx.stroke();
+
+    /* shine */
+    const sh=ctx.createLinearGradient(-bW*.28,-bH*.42,-bW*.1,bH*.3);
+    sh.addColorStop(0,`rgba(255,255,255,${.58+.1*Math.sin(t*.7)})`);
+    sh.addColorStop(.5,'rgba(255,255,255,.2)'); sh.addColorStop(1,'transparent');
+    ctx.fillStyle=sh;
+    ctx.beginPath(); ctx.roundRect(-bW*.28,-bH/2,bW*.18,bH,[bW*.09]); ctx.fill();
+
+    ctx.restore();
+
+    /* rings */
+    for(let i=0;i<3;i++){
+      const r=H*(.22+i*.09), rh=(hue+i*60)%360;
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(t*.12*(i%2===0?1:-1));
+      ctx.strokeStyle=`hsla(${rh},44%,72%,${.1-i*.025})`;
+      ctx.lineWidth=.7; ctx.setLineDash([3,12+i*6]);
+      ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]); ctx.restore();
+    }
+    t+=.014; requestAnimationFrame(draw);
+  }
+  draw();
+});
+
+/* ══ FEATURE CANVAS ══ */
+(function(){
+  const cv=document.getElementById('featureCanvas'); if(!cv)return;
+  const ctx=cv.getContext('2d'); let W,H,t=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  function draw(){
+    ctx.clearRect(0,0,W,H); ctx.fillStyle='#ededf2'; ctx.fillRect(0,0,W,H);
+    const cx=W*.7,cy=H*.5,hue=(t*14)%360;
+
+    /* iri atmosphere */
+    [[0,.5,.52],[90,.38,.26],[180,.34,.14]].forEach(([off,s,a],i)=>{
+      const g=ctx.createRadialGradient(cx+i*W*.03,cy-i*H*.02,0,cx,cy,H*(0.8+i*.1));
+      g.addColorStop(0,`hsla(${(hue+off)%360},${s*100}%,86%,${a+.04*Math.sin(t*.4+i)})`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    });
+
+    /* figure halo */
+    const fh=ctx.createRadialGradient(cx,cy-H*.05,0,cx,cy,H*.46);
+    fh.addColorStop(0,`rgba(218,212,228,${.55+.06*Math.sin(t*.5)})`);
+    fh.addColorStop(.4,'rgba(200,196,215,.18)'); fh.addColorStop(1,'transparent');
+    ctx.fillStyle=fh; ctx.beginPath(); ctx.ellipse(cx,cy-H*.05,W*.13,H*.28,0,0,Math.PI*2); ctx.fill();
+
+    /* profile line */
+    ctx.strokeStyle=`hsla(${(hue+120)%360},46%,65%,${.24+.07*Math.sin(t*.7)})`;
+    ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.moveTo(cx+W*.04,cy-H*.22);
+    ctx.bezierCurveTo(cx+W*.08,cy-H*.18,cx+W*.09,cy-H*.1,cx+W*.07,cy);
+    ctx.bezierCurveTo(cx+W*.06,cy+H*.06,cx+W*.03,cy+H*.1,cx,cy+H*.12); ctx.stroke();
+
+    /* hand glow */
+    const hg=ctx.createRadialGradient(cx-W*.05,cy+H*.09,0,cx,cy+H*.1,W*.09);
+    hg.addColorStop(0,`hsla(${(hue+200)%360},50%,76%,${.48+.1*Math.sin(t*1.5)})`);
+    hg.addColorStop(1,'transparent');
+    ctx.fillStyle=hg; ctx.beginPath(); ctx.ellipse(cx-W*.04,cy+H*.1,W*.07,H*.055,.2,0,Math.PI*2); ctx.fill();
+
+    /* orbiting specks */
+    for(let i=0;i<48;i++){
+      const a=(i/48)*Math.PI*2+t*.1;
+      const r=H*(.3+.07*Math.sin(i*.7+t*.28));
+      const px=cx+Math.cos(a)*r*.68, py=cy+Math.sin(a)*r;
+      const sh=(hue+i*8)%360;
+      const al=(.07+.07*Math.sin(i+t*2))*(.5+.3*Math.random());
+      ctx.beginPath(); ctx.arc(px,py,.9+Math.random()*.8,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${sh},52%,72%,${al})`; ctx.fill();
+    }
+
+    /* silver lines */
+    for(let i=0;i<8;i++){
+      const y=H*.2+i*H*.08, len=W*(.12+.09*Math.sin(i*1.1+t*.5));
+      ctx.strokeStyle=`rgba(130,138,158,${.14+.04*Math.sin(i+t)})`;
+      ctx.lineWidth=.7;
+      ctx.beginPath(); ctx.moveTo(cx+W*.16,y); ctx.lineTo(cx+W*.16+len,y); ctx.stroke();
+    }
+    t+=.01; requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══ INGREDIENT CANVAS ══ */
+(function(){
+  const cv=document.getElementById('ingredientCanvas'); if(!cv)return;
+  const ctx=cv.getContext('2d'); let W,H,t=0;
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight;}
+  resize(); window.addEventListener('resize',resize);
+  const nodes=Array.from({length:20},()=>({
+    x:.12+Math.random()*.76, y:.08+Math.random()*.84,
+    r:2.5+Math.random()*5, phase:Math.random()*Math.PI*2,
+    speed:.25+Math.random()*.38, hue:Math.random()*360
+  }));
+  function draw(){
+    ctx.clearRect(0,0,W,H); ctx.fillStyle='#f5f4f8'; ctx.fillRect(0,0,W,H);
+    const mh=(t*13)%360;
+
+    /* connections */
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const ax=nodes[i].x*W, ay=nodes[i].y*H+Math.sin(t*nodes[i].speed+nodes[i].phase)*10;
+        const bx=nodes[j].x*W, by=nodes[j].y*H+Math.sin(t*nodes[j].speed+nodes[j].phase)*10;
+        const d=Math.hypot(ax-bx,ay-by);
+        if(d<W*.3){
+          const al=(1-d/(W*.3))*.14;
+          ctx.strokeStyle=`hsla(${(mh+(i+j)*18)%360},40%,68%,${al})`;
+          ctx.lineWidth=.6; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
+        }
+      }
+    }
+
+    /* nodes */
+    nodes.forEach((n,i)=>{
+      const x=n.x*W, y=n.y*H+Math.sin(t*n.speed+n.phase)*10;
+      const pulse=1+.14*Math.sin(t*n.speed*1.2+n.phase);
+      const nh=(mh+i*20)%360;
+      const g=ctx.createRadialGradient(x,y,0,x,y,n.r*3.2*pulse);
+      g.addColorStop(0,`hsla(${nh},50%,74%,.55)`);
+      g.addColorStop(.45,`hsla(${(nh+40)%360},44%,80%,.12)`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,n.r*3.2*pulse,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x,y,n.r*pulse*.38,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${nh},44%,62%,.85)`; ctx.fill();
+      ctx.beginPath(); ctx.arc(x-n.r*.12,y-n.r*.12,n.r*.12*pulse,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,.75)'; ctx.fill();
+    });
+
+    /* center glow */
+    const cg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,H*.45);
+    cg.addColorStop(0,`rgba(175,180,200,${.07+.025*Math.sin(t*.4)})`);
+    cg.addColorStop(1,'transparent');
+    ctx.fillStyle=cg; ctx.fillRect(0,0,W,H);
+
+    t+=.016; requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══ ARTIST CANVASES ══ */
+document.querySelectorAll('.artist-canvas').forEach(cv => {
+  const ctx = cv.getContext('2d');
+  const baseHue = parseInt(cv.dataset.hue) || 200;
+  const featured = !!cv.dataset.featured;
+  let t = Math.random() * 100;
+
+  function resize() { cv.width = cv.offsetWidth; cv.height = cv.offsetHeight; }
+  resize();
+
+  // Each artist card gets a unique generative portrait feel
+  const nodes = Array.from({length: featured ? 28 : 16}, () => ({
+    x: Math.random(), y: Math.random(),
+    vx: (Math.random()-.5)*.0006, vy: (Math.random()-.5)*.0006,
+    r: 1.5 + Math.random() * (featured ? 5 : 3.5),
+    phase: Math.random() * Math.PI * 2,
+    speed: .2 + Math.random() * .35,
+    hue: baseHue + (Math.random()-.5)*80,
+  }));
+
+  function draw() {
+    const W = cv.width, H = cv.height;
+    ctx.clearRect(0,0,W,H);
+
+    // dark base
+    ctx.fillStyle = '#0c0c14'; ctx.fillRect(0,0,W,H);
+
+    const hue = (baseHue + t * 8) % 360;
+
+    // deep atmospheric glow — signature per artist
+    const atmo = ctx.createRadialGradient(W*.5, H*.42, 0, W*.5, H*.5, Math.max(W,H)*.85);
+    atmo.addColorStop(0, `hsla(${hue},45%,30%,${.35+.06*Math.sin(t*.3)})`);
+    atmo.addColorStop(.4, `hsla(${(hue+60)%360},38%,22%,.18)`);
+    atmo.addColorStop(.75, `hsla(${(hue+130)%360},30%,15%,.08)`);
+    atmo.addColorStop(1, 'transparent');
+    ctx.fillStyle = atmo; ctx.fillRect(0,0,W,H);
+
+    // figure silhouette — abstract face halo
+    const fHue = (hue+180)%360;
+    const cx = W*.5, cy = H*(featured?.4:.42);
+    const fh = ctx.createRadialGradient(cx,cy,0,cx,cy,H*(featured?.35:.3));
+    fh.addColorStop(0,`hsla(${fHue},50%,72%,${.22+.05*Math.sin(t*.4)})`);
+    fh.addColorStop(.4,`hsla(${(fHue+40)%360},42%,60%,.1)`);
+    fh.addColorStop(1,'transparent');
+    ctx.fillStyle=fh;
+    ctx.beginPath();
+    ctx.ellipse(cx,cy,W*(featured?.1:.12),H*(featured?.2:.18),0,0,Math.PI*2);
+    ctx.fill();
+
+    // body suggestion
+    const bodyG = ctx.createLinearGradient(cx,H*.55,cx,H);
+    bodyG.addColorStop(0,`hsla(${hue},28%,45%,.2)`);
+    bodyG.addColorStop(1,'transparent');
+    ctx.fillStyle=bodyG;
+    ctx.beginPath();
+    ctx.moveTo(cx-W*.2,H); ctx.bezierCurveTo(cx-W*.16,H*.76,cx-W*.09,H*.63,cx,H*.57);
+    ctx.bezierCurveTo(cx+W*.09,H*.63,cx+W*.16,H*.76,cx+W*.2,H); ctx.fill();
+
+    // iridescent orbiting particles / nodes
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if(n.x<0||n.x>1) n.vx*=-1;
+      if(n.y<0||n.y>1) n.vy*=-1;
+      const px=n.x*W, py=n.y*H;
+      const pulse=1+.12*Math.sin(t*n.speed+n.phase);
+      const nh=(n.hue+t*6)%360;
+      const g=ctx.createRadialGradient(px,py,0,px,py,n.r*3.5*pulse);
+      g.addColorStop(0,`hsla(${nh},55%,75%,.45)`);
+      g.addColorStop(.5,`hsla(${(nh+50)%360},48%,68%,.1)`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(px,py,n.r*3.5*pulse,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(px,py,n.r*.42*pulse,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${nh},50%,78%,.82)`; ctx.fill();
+    });
+
+    // iridescent ring / halo for artist
+    for(let i=0;i<3;i++){
+      const r=Math.min(W,H)*(featured?(.24+i*.07):(.2+i*.06));
+      const a=t*(.13-i*.03)+i*1.2;
+      const rh=(hue+i*60)%360;
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(a);
+      ctx.strokeStyle=`hsla(${rh},50%,70%,${.1-i*.025})`;
+      ctx.lineWidth=.8; ctx.setLineDash([4,12+i*5]);
+      ctx.beginPath(); ctx.ellipse(0,0,r*(.55+i*.06),r,i*.28,0,Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]); ctx.restore();
+    }
+
+    // horizontal light streaks — gallery atmosphere
+    for(let i=0;i<5;i++){
+      const sy=H*(.15+i*.17)+Math.sin(t*.2+i)*H*.03;
+      const len=W*(featured?(.3+.15*Math.sin(i+t*.3)):(.2+.12*Math.sin(i+t*.3)));
+      const sx=W*(featured?.12:.1)+Math.sin(t*.15+i)*W*.05;
+      const lh=(hue+i*30)%360;
+      const lg=ctx.createLinearGradient(sx,sy,sx+len,sy);
+      lg.addColorStop(0,'transparent');
+      lg.addColorStop(.3,`hsla(${lh},45%,70%,${.12+.04*Math.sin(t+i)})`);
+      lg.addColorStop(.7,`hsla(${(lh+40)%360},40%,72%,.08)`);
+      lg.addColorStop(1,'transparent');
+      ctx.strokeStyle=lg; ctx.lineWidth=.7;
+      ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(sx+len,sy); ctx.stroke();
+    }
+
+    // vignette
+    const vig=ctx.createRadialGradient(W/2,H/2,H*.2,W/2,H/2,H*.9);
+    vig.addColorStop(0,'transparent'); vig.addColorStop(1,'rgba(6,6,10,.65)');
+    ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
+
+    t+=.012; requestAnimationFrame(draw);
+  }
+  draw();
+});
+
+/* ══ MUSIC PLAYER — YouTube IFrame API ══ */
+(function(){
+  const btn       = document.getElementById('musicBtn');
+  const bars      = document.getElementById('musicBars');
+  const pauseIcon = document.getElementById('musicPauseIcon');
+  const tooltip   = document.getElementById('musicTooltip');
+  let player, ready = false, playing = false;
+
+  /* Load YouTube IFrame API */
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = function(){
+    player = new YT.Player('ytPlayer', {
+      height:'1', width:'1',
+      videoId: 'dNCWe_6HAM8',
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        iv_load_policy: 3,
+        modestbranding: 1,
+        rel: 0,
+        start: 0
+      },
+      events: {
+        onReady: () => { ready = true; },
+        onStateChange: (e) => {
+          if(e.data === YT.PlayerState.PLAYING){
+            setPlaying(true);
+          } else if(e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED){
+            setPlaying(false);
+          }
+        }
+      }
+    });
+  };
+
+  function setPlaying(state){
+    playing = state;
+    btn.classList.toggle('playing', state);
+    bars.style.display      = state ? 'flex'  : 'flex';
+    pauseIcon.style.display = state ? 'block' : 'none';
+    bars.style.display      = state ? 'none'  : 'flex';
+    tooltip.textContent     = state ? 'NOW PLAYING — PAUSE' : 'LISA — MONEY';
+  }
+
+  btn.addEventListener('click', () => {
+    if(!ready) return;
+    if(playing){
+      player.pauseVideo();
+    } else {
+      player.playVideo();
+    }
+  });
+
+  /* Tooltip show on hover */
+  btn.addEventListener('mouseenter', () => tooltip.classList.add('visible'));
+  btn.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+})();
+
+/* ══ INSTAGRAM FEED CARDS ══ */
+(function(){
+  const track = document.getElementById('instaTrack');
+  if(!track) return;
+
+  const posts = [
+    { type:'photo', handle:'@yunabeautylog',    caption:'Trying the new Void Serum I from @koreancosme — my skin has never looked this luminous ✦', likes:'12.4K', views:null,   hue:260, tall:true,  wide:false },
+    { type:'video', handle:'@seoulglowdiaries', caption:'Full morning routine using only KC products. The Circuit Mist is everything 🌿',             likes:'8.1K',  views:'94K', hue:175, tall:false, wide:true  },
+    { type:'photo', handle:'@minimal.kr',        caption:'Skincare as ritual. The packaging alone deserves a place on my shelf.',                      likes:'21K',   views:null,   hue:330, tall:true,  wide:false },
+    { type:'video', handle:'@athensbeautyclub',  caption:'Pop-up opening night at @koreancosme Athens — art meets beauty 🖤',                          likes:'6.7K',  views:'42K', hue:200, tall:false, wide:false },
+    { type:'photo', handle:'@kbeauty_by_ara',    caption:'Lunar Cream texture is unreal. K-beauty science is truly a different level.',                likes:'17.8K', views:null,   hue:45,  tall:true,  wide:false },
+    { type:'video', handle:'@glasskinofficial',  caption:'Featuring @koreancosme Galactomyces line — swipe for before/after 🪞',                      likes:'33K',   views:'210K',hue:300, tall:false, wide:true  },
+    { type:'photo', handle:'@mi.skincare',       caption:'The store itself is a work of art. Athens needed this.',                                     likes:'9.2K',  views:null,   hue:160, tall:false, wide:false },
+    { type:'video', handle:'@kpopbeautyseoul',   caption:'Exhibition night + new Quantum Peptide drop — perfect combo ✨',                             likes:'14K',   views:'78K', hue:22,  tall:true,  wide:false },
+  ];
+
+  function makeCard(p) {
+    const card = document.createElement('div');
+    card.className = 'insta-card' + (p.tall?' tall':'') + (p.wide?' wide':'');
+
+    const cv = document.createElement('canvas');
+    card.appendChild(cv);
+
+    if(p.type==='video'){
+      const badge = document.createElement('div');
+      badge.className = 'insta-badge';
+      badge.textContent = '▶  VIDEO';
+      card.appendChild(badge);
+    }
+
+    const dot = document.createElement('div');
+    dot.className = 'insta-type-dot';
+    dot.style.background = `linear-gradient(135deg,hsl(${p.hue},55%,72%),hsl(${(p.hue+60)%360},50%,68%))`;
+    card.appendChild(dot);
+
+    const glass = document.createElement('div');
+    glass.className = 'insta-glass';
+    card.appendChild(glass);
+
+    const info = document.createElement('div');
+    info.className = 'insta-info';
+    let statsHTML = `<span class="insta-stat">♡ ${p.likes}</span>`;
+    if(p.views) statsHTML += `<span class="insta-stat">▶ ${p.views}</span>`;
+    info.innerHTML = `
+      <div class="insta-handle">${p.handle}</div>
+      <div class="insta-caption">${p.caption}</div>
+      <div class="insta-stats">${statsHTML}</div>`;
+    card.appendChild(info);
+
+    // animated canvas background
+    const ctx = cv.getContext('2d');
+    let t = Math.random()*80;
+    const bh = p.hue;
+
+    function resize(){ cv.width=cv.offsetWidth; cv.height=cv.offsetHeight; }
+    resize();
+
+    function draw(){
+      const W=cv.width, H=cv.height;
+      if(!W||!H){ requestAnimationFrame(draw); return; }
+      ctx.clearRect(0,0,W,H);
+      const hue=(bh+t*6)%360;
+
+      // pale iridescent base
+      ctx.fillStyle=`hsl(${hue},16%,95%)`; ctx.fillRect(0,0,W,H);
+
+      // atmospheric bloom
+      const g=ctx.createRadialGradient(W*.5,H*.38,0,W*.5,H*.5,Math.max(W,H)*.8);
+      g.addColorStop(0,`hsla(${hue},46%,82%,${.35+.06*Math.sin(t*.4)})`);
+      g.addColorStop(.45,`hsla(${(hue+70)%360},38%,86%,.16)`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+      // figure halo
+      const fg=ctx.createRadialGradient(W*.5,H*.4,0,W*.5,H*.4,H*.3);
+      fg.addColorStop(0,`hsla(${(hue+180)%360},44%,70%,${.2+.05*Math.sin(t*.35)})`);
+      fg.addColorStop(1,'transparent');
+      ctx.fillStyle=fg; ctx.beginPath(); ctx.ellipse(W*.5,H*.4,W*.16,H*.24,0,0,Math.PI*2); ctx.fill();
+
+      // skin tone
+      const sk=ctx.createLinearGradient(W*.4,H*.18,W*.6,H*.52);
+      sk.addColorStop(0,'rgba(228,210,198,.48)'); sk.addColorStop(1,'transparent');
+      ctx.fillStyle=sk; ctx.beginPath(); ctx.ellipse(W*.5,H*.38,W*.09,H*.19,0,0,Math.PI*2); ctx.fill();
+
+      // product glow
+      const pg=ctx.createRadialGradient(W*.5,H*.62,0,W*.5,H*.62,W*.13);
+      pg.addColorStop(0,`hsla(${hue},50%,78%,${.38+.08*Math.sin(t*1.4)})`);
+      pg.addColorStop(1,'transparent');
+      ctx.fillStyle=pg; ctx.beginPath(); ctx.ellipse(W*.5,H*.62,W*.09,H*.05,0,0,Math.PI*2); ctx.fill();
+
+      // iridescent specks
+      for(let i=0;i<20;i++){
+        const sx=W*((.1+.8*(((i*.137+t*.006)%1+1)%1)));
+        const sy=H*((.05+.9*(((i*.233+t*.004)%1+1)%1)));
+        const sr=.3+.8*Math.sin(i*2.1+t*.3);
+        ctx.beginPath(); ctx.arc(sx,sy,Math.max(sr,.1),0,Math.PI*2);
+        ctx.fillStyle=`hsla(${(hue+i*20)%360},52%,74%,${.2+.12*Math.sin(i+t*.8)})`; ctx.fill();
+      }
+
+      // ring
+      ctx.save(); ctx.translate(W*.5,H*.4); ctx.rotate(t*.09);
+      ctx.strokeStyle=`hsla(${hue},42%,70%,${.08+.03*Math.sin(t*.5)})`;
+      ctx.lineWidth=.6; ctx.setLineDash([3,9]);
+      ctx.beginPath(); ctx.arc(0,0,Math.min(W,H)*.22,0,Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]); ctx.restore();
+
+      // bottom fade to white
+      const bot=ctx.createLinearGradient(0,H*.58,0,H);
+      bot.addColorStop(0,'transparent'); bot.addColorStop(1,`hsla(${hue},12%,93%,.5)`);
+      ctx.fillStyle=bot; ctx.fillRect(0,0,W,H);
